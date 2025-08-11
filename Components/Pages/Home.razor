@@ -1,7 +1,62 @@
 ﻿@page "/"
+@using VRJewelers.Models
+@inject VRJewelers.Services.ProductosService productoService
 
-<PageTitle>Home</PageTitle>
+<PageTitle>VRJewelry - Inicio</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container py-5">
+    <header class="text-center mb-5">
+        <h1 class="display-3 fw-bold text-primary">VRJewelry</h1>
+        <p class="lead text-secondary fs-4">Las mejores joyas precio-calidad. Descubre nuestra colección exclusiva.</p>
+    </header>
 
-Welcome to your new app.
+    @if (productos == null)
+    {
+        <div class="d-flex justify-content-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando productos...</span>
+            </div>
+        </div>
+    }
+    else if (!productos.Any())
+    {
+        <p class="text-center text-muted fs-5">No hay productos disponibles en este momento.</p>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var producto in productos.Take(6))
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0 rounded-3">
+                        <img src="@producto.ImagenUrl" class="card-img-top rounded-top" alt="@producto.Nombre" style="height: 280px; object-fit: cover;" />
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-semibold text-primary">@producto.Nombre</h5>
+                            <p class="card-text text-muted flex-grow-1">@producto.Descripcion</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="fs-5 fw-bold text-success">@producto.Precio.ToString("C")</span>
+                                <a href="/producto/@producto.ProductoId" class="btn btn-outline-primary btn-sm">Ver detalles</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+</div>
+
+<footer class="bg-dark text-light py-4 mt-5">
+    <div class="container text-center">
+        <small>&copy; 2024 VRJewelry. Todos los derechos reservados.</small>
+    </div>
+</footer>
+
+@code {
+    private List<Productos> productos = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        productos = await productoService.GetAllObject();
+    }
+}
