@@ -32,7 +32,7 @@ namespace VRJewelers.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
-                name: "Nombre",
+                name: "NombreProducto",
                 table: "AspNetUsers",
                 type: "nvarchar(max)",
                 nullable: true);
@@ -121,7 +121,7 @@ namespace VRJewelers.Migrations
                         name: "FK_Productos_CategoriaProductos_TipoId",
                         column: x => x.TipoId,
                         principalTable: "CategoriaProductos",
-                        principalColumn: "TipoId",
+                        principalColumn: "TipoProducto",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -210,7 +210,7 @@ namespace VRJewelers.Migrations
 
             migrationBuilder.InsertData(
                 table: "CategoriaProductos",
-                columns: new[] { "TipoId", "Nombre" },
+                columns: new[] { "TipoProducto", "NombreProducto" },
                 values: new object[,]
                 {
                     { 1, "Joyeria" },
@@ -231,7 +231,7 @@ namespace VRJewelers.Migrations
 
             migrationBuilder.InsertData(
                 table: "MetodoPagos",
-                columns: new[] { "MetodoPagoId", "Nombre" },
+                columns: new[] { "MetodoPagoId", "NombreProducto" },
                 values: new object[,]
                 {
                     { 1, "Efectivo" },
@@ -240,7 +240,7 @@ namespace VRJewelers.Migrations
 
             migrationBuilder.InsertData(
                 table: "Productos",
-                columns: new[] { "ProductoId", "Cantidad", "Descripcion", "Disponible", "ITBIS", "ImagenUrl", "Nombre", "Precio", "TipoId" },
+                columns: new[] { "ProductoId", "Stock", "Descripcion", "Disponible", "ITBIS", "ImagenUrl", "NombreProducto", "Precio", "TipoProducto" },
                 values: new object[,]
                 {
                     { 1, 50, "Elegante anillo de oro 18 quilates con acabado pulido.", true, 855f, "/images/anillo_oro.jpg", "Anillo de Oro 18K", 4750f, 1 },
@@ -275,7 +275,7 @@ namespace VRJewelers.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Productos_TipoId",
                 table: "Productos",
-                column: "TipoId");
+                column: "TipoProducto");
 
             migrationBuilder.CreateIndex(
                 name: "IX_VentasDetalle_ProductoId",
@@ -328,7 +328,7 @@ namespace VRJewelers.Migrations
                 table: "AspNetUsers");
 
             migrationBuilder.DropColumn(
-                name: "Nombre",
+                name: "NombreProducto",
                 table: "AspNetUsers");
         }
     }

@@ -119,7 +119,7 @@ namespace VRJewelers.Migrations
 
             migrationBuilder.InsertData(
                 table: "Productos",
-                columns: new[] { "ProductoId", "Cantidad", "Descripcion", "Disponible", "ITBIS", "ImagenUrl", "Nombre", "Precio", "TipoId" },
+                columns: new[] { "ProductoId", "Stock", "Descripcion", "Disponible", "ITBIS", "ImagenUrl", "NombreProducto", "Precio", "TipoProducto" },
                 values: new object[] { 7, 50, "Broche en forma de flor con incrustaciones de cristal.", true, 324f, "/Imagen/broche_floral.jpg", "Broche Floral", 1800f, 1 });
         }
     }
