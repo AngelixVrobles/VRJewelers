@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace VRJewelers.Models;
 
@@ -8,25 +7,17 @@ public class Productos
     [Key]
     public int ProductoId { get; set; }
 
-    [ForeignKey("Categorias")]
-    public int TipoId { get; set; }
+    public string TipoProducto { get; set; }
 
-    // [Required(ErrorMessage = "Se Requiere una Tipo")]
-    public TipoProducto? Tipo { get; set; }
-
-    [Required(ErrorMessage = "Se Requiere un Nombre")]
-    [RegularExpression("^[a-zA-Z0-9 ]+$", ErrorMessage = "El Nombre debe Contener Solo Letras y Números.")]
-    public string? Nombre { get; set; } = string.Empty;
+    [Required(ErrorMessage = "Se Requiere un NombreProducto")]
+    [RegularExpression("^[a-zA-Z0-9 ]+$", ErrorMessage = "El NombreProducto debe Contener Solo Letras y Números.")]
+    public string? NombreProducto { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Se Requiere de una Descripción")]
     [RegularExpression("^[a-zA-Z0-9 ,]+$", ErrorMessage = "La Descripción debe contener solo Letras y Números")]
     public string? Descripcion { get; set; } = string.Empty;
 
-    [Range(0, 1000, ErrorMessage = "La Cantidad debe estar entre 0 y 1000")]
-    [Required(ErrorMessage = "Indique la Cantidad")]
-    public int Cantidad { get; set; }
-
-    [Required(ErrorMessage = "Indique el Precio")]
+    [Required(ErrorMessage = "Indique el precio")]
     [Range(0.01, 1000000000, ErrorMessage = "El Precio debe estar 0.01 y 1000000000")]
     public float Precio { get; set; }
     public float ITBIS { get; set; }

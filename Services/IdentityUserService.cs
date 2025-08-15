@@ -59,18 +59,6 @@ public class IdentityUserService
         return await _userManager.CheckPasswordAsync(user, password);
     }
 
-    public async Task<bool> GetNickNameAsync(string user)
-    {
-        using var context = _contextFactory.CreateDbContext();
-        return await context.Users.AnyAsync(x => x.NickName == user);
-    }
-
-    public async Task<bool> CedulaExistAsync(string user)
-    {
-        using var context = _contextFactory.CreateDbContext();
-        return await context.Users.AnyAsync(x => x.Cedula == user);
-    }
-
     public async Task<IdentityRole?> GetRoleAsync(ApplicationUser user)
     {
         using var context = _contextFactory.CreateDbContext();

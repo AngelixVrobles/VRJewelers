@@ -192,7 +192,7 @@ namespace VRJewelers.Migrations
                     b.Property<string>("NickName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Nombre")
+                    b.Property<string>("Descripcion")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
@@ -287,7 +287,7 @@ namespace VRJewelers.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MetodoPagoId"));
 
-                    b.Property<string>("Nombre")
+                    b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -360,7 +360,7 @@ namespace VRJewelers.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DetalleId"));
 
-                    b.Property<int>("Cantidad")
+                    b.Property<int>("Stock")
                         .HasColumnType("int");
 
                     b.Property<int>("OrdenId")
@@ -389,7 +389,7 @@ namespace VRJewelers.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductoId"));
 
-                    b.Property<int>("Cantidad")
+                    b.Property<int>("Stock")
                         .HasColumnType("int");
 
                     b.Property<string>("Descripcion")
@@ -405,19 +405,19 @@ namespace VRJewelers.Migrations
                     b.Property<string>("ImagenUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Nombre")
+                    b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<float>("Precio")
                         .HasColumnType("real");
 
-                    b.Property<int>("TipoId")
+                    b.Property<int>("TipoProducto")
                         .HasColumnType("int");
 
                     b.HasKey("ProductoId");
 
-                    b.HasIndex("TipoId");
+                    b.HasIndex("TipoProducto");
 
                     b.ToTable("Productos");
 
@@ -570,17 +570,17 @@ namespace VRJewelers.Migrations
 
             modelBuilder.Entity("VRJewelers.Models.TipoProducto", b =>
                 {
-                    b.Property<int>("TipoId")
+                    b.Property<int>("TipoProducto")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TipoId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TipoProducto"));
 
-                    b.Property<string>("Nombre")
+                    b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("TipoId");
+                    b.HasKey("TipoProducto");
 
                     b.ToTable("CategoriaProductos");
 
@@ -652,7 +652,7 @@ namespace VRJewelers.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DetalleID"));
 
-                    b.Property<int>("Cantidad")
+                    b.Property<int>("Stock")
                         .HasColumnType("int");
 
                     b.Property<float>("Precio")
@@ -758,7 +758,7 @@ namespace VRJewelers.Migrations
                 {
                     b.HasOne("VRJewelers.Models.TipoProducto", "Tipo")
                         .WithMany()
-                        .HasForeignKey("TipoId")
+                        .HasForeignKey("TipoProducto")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
