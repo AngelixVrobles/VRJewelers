@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
+using VrJewelers.Services;
 using VRJewelers.Components;
 using VRJewelers.Components.Account;
 using VRJewelers.Data;
-using VRJewelers.Models;
 using VRJewelers.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +16,10 @@ builder.Services.AddRazorComponents()
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
+builder.Services.AddScoped<CarritoService>();
+builder.Services.AddScoped<AdminsService>();
+builder.Services.AddScoped<ClientesService>();
+builder.Services.AddScoped<ProductosService>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
 builder.Services.AddAuthentication(options =>
@@ -42,13 +45,7 @@ builder.Services.AddScoped<ApplicationUser, UsersService>();
 builder.Services.AddScoped<IdentityRole, RolesService>();
 builder.Services.AddScoped<IdentityUserRole<string>, UserRolesService>();
 builder.Services.AddScoped<ProductosService>();
-builder.Services.AddScoped<TipoProductosService>();
-builder.Services.AddScoped<OrdenesService>();
-builder.Services.AddScoped<VentasService>();
-builder.Services.AddScoped<EstadosService>();
-builder.Services.AddScoped<MetodosPagosService>();
 builder.Services.AddScoped<ProductosService>();
-builder.Services.AddScoped<MetodoPagos>();
 builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<IdentityUserService>();
 
