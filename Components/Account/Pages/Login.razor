@@ -9,6 +9,9 @@
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject UserManager<ApplicationUser> UserManager
+@inject CarritoService carritoService
+
 
 <PageTitle>Iniciar Sesión</PageTitle>
 
@@ -113,26 +116,17 @@
 
     public async Task LoginUser()
     {
-        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-        if (result.Succeeded)
+        var user = await UserManager.FindByEmailAsync(Input.Email);
+        if (user != null && user.PasswordHash == Input.Password)
         {
+            await SignInManager.SignInAsync(user, Input.RememberMe, null);
             Logger.LogInformation("User logged in.");
+            await carritoService.MigrarCarritoAnonimoAlClienteAsync();
             RedirectManager.RedirectTo(ReturnUrl);
-        }
-        else if (result.RequiresTwoFactor)
-        {
-            RedirectManager.RedirectTo(
-                "Account/LoginWith2fa",
-                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
-        }
-        else if (result.IsLockedOut)
-        {
-            Logger.LogWarning("User account locked out.");
-            RedirectManager.RedirectTo("Account/Lockout");
         }
         else
         {
-            errorMessage = "Error: Intento de inicio de sesión inválido.";
+            errorMessage = "Error: Contraseña o Email incorrectos.";
         }
     }
 
