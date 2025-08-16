@@ -21,7 +21,5 @@ public class Productos
     [Required(ErrorMessage = "Indique el precio")]
     [Range(0.01, 1000000000, ErrorMessage = "El Precio debe estar 0.01 y 1000000000")]
     public float Precio { get; set; }
-    public float ITBIS { get; set; }
-    public bool Disponible { get; set; }
-    public string? ImagenUrl { get; set; }
+    public string? ImagenUrl { get; set; } = null;
 }

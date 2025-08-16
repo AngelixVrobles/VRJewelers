@@ -13,6 +13,7 @@
 @inject VRJewelers.Services.ProductosService productoService
 @inject AdminsService adminsService
 @inject CarritoService carritoService
+@inject NavigationManager navigationManager
 
 <PageTitle>VRJewelry - Inicio</PageTitle>
 
@@ -51,7 +52,7 @@
                 <div class="col-12 col-sm-6 col-lg-4">
                     <div class="card border-0 shadow-sm h-100 product-card">
                         <div class="ratio ratio-1x1">
-                            <img src="@producto.ImagenUrl" class="card-img-top object-fit-cover" alt="@producto.NombreProducto" />
+                            <img @onclick="() => VerProducto(producto.ProductoId)" src="@producto.ImagenUrl" class="card-img-top object-fit-cover" alt="@producto.NombreProducto" />
                         </div>
                         <div class="card-body text-center">
                             <h5 class="fw-bold">@producto.NombreProducto</h5>
@@ -59,9 +60,12 @@
                             <div class="mt-3">
                                 <span class="fw-bold fs-5 text-dark">@producto.Precio.ToString("C")</span>
                             </div>
-                            <button type="button" @onclick="(() => AgregarAlCarritoAsync(producto.ProductoId, producto.Precio))" class="btn btn-dark btn-sm mt-3 px-4 rounded-pill">
-                                + <i class="bi bi-cart4"></i>
-                            </button>
+                            <EditForm Model="producto" FormName="@producto.NombreProducto" OnValidSubmit="() => AgregarAlCarritoAsync(producto.ProductoId, producto.Precio)">
+                                <button type="submit"
+                                class="btn btn-dark btn-sm mt-3 px-4 rounded-pill">
+                                    + <i class="bi bi-cart4"></i>
+                                </button>
+                            </EditForm>
                         </div>
                     </div>
                 </div>
@@ -79,20 +83,20 @@
 
 <style>
     .hero-section {
-        background: url('https://images.unsplash.com/photo-1523275335684-37898b6baf30') center/cover no-repeat;
-        height: 80vh;
+    background: url('https://images.unsplash.com/photo-1523275335684-37898b6baf30') center/cover no-repeat;
+    height: 80vh;
     }
 
     .product-card {
-        transition: transform 0.25s ease-in-out;
+    transition: transform 0.25s ease-in-out;
     }
 
-        .product-card:hover {
-            transform: translateY(-5px);
-        }
+    .product-card:hover {
+    transform: translateY(-5px);
+    }
 
     .object-fit-cover {
-        object-fit: cover;
+    object-fit: cover;
     }
 </style>
 
@@ -103,7 +107,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Productos = await productoService.ListarFiltrador(x => true);
+        Productos = await productoService.Listar(x => true);
 
         if ((ListaAdmin = await adminsService.Listar(x => true)).Count == 0)
         {
@@ -150,7 +154,13 @@
 
     public async Task AgregarAlCarritoAsync(int productoId, float precio)
     {
-        Console.WriteLine("Hola  mundo");
+        await carritoService.AgregarAlCarritoAsync(productoId, precio);
+        StateHasChanged();
+    }
+
+    public void VerProducto(int productoId)
+    {
+        navigationManager.NavigateTo($"/Productos/View/{productoId}");
     }
 
     private ApplicationUser CreateUser()

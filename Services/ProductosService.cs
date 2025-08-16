@@ -59,7 +59,14 @@ public class ProductosService(IDbContextFactory<ApplicationDbContext> contextFac
             .AnyAsync(p => p.ProductoId != id);
     }
 
-    public async Task<List<Productos>> ListarFiltrador(Expression<Func<Productos, bool>> criterio)
+    public async Task<bool> Validar(Productos producto)
+    {
+        using var context = contextFactory.CreateDbContext();
+        return await context.Productos
+            .AnyAsync(p => p.NombreProducto == producto.NombreProducto && p.ProductoId != producto.ProductoId);
+    }
+
+    public async Task<List<Productos>> Listar(Expression<Func<Productos, bool>> criterio)
     {
         using var context = contextFactory.CreateDbContext();
         return await context.Productos

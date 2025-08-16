@@ -1,19 +1,18 @@
-﻿@page "/Clientes/Index"
-
+﻿@page "/Productos/Index"
 @using BlazorBootstrap
 @using Microsoft.AspNetCore.Authorization
-@using VRJewelers.Data
 @using VRJewelers.Services
 @using VrJewelers.Models
 
 @rendermode InteractiveServer
-@attribute [StreamRendering]
 
-@inject ClientesService clientesService
+@inject ProductosService productosService
+@inject AuthenticationStateProvider AuthStateProvider
 
 @attribute [Authorize(Roles = "admin")]
+@attribute [StreamRendering]
 
-<PageTitle>Registro de Clientes</PageTitle>
+<PageTitle>Registro de Productos</PageTitle>
 <br />
 <br />
 <div class="container mb-4">
@@ -21,11 +20,11 @@
         <div class="row p-2 m-2">
             <div class="col">
                 <div class="text-left">
-                    <h2 class="text-black"><i class="bi bi-people"></i>Clientes</h2>
+                    <h2 class="text-black">Productos</h2>
                 </div>
             </div>
             <div class="col text-end">
-                <a href="/Clientes/Create" class="btn btn-secondary">Crear</a>
+                <a href="/Productos/Create" class="btn btn-secondary">Crear</a>
             </div>
         </div>
     </div>
@@ -36,36 +35,35 @@
         <div class="card-body">
             <div class="row mb-4">
                 <div class="col-4">
-                    <div class="input-group" style="width: 300px">
+                    <div class="input-group" style="width: 250px">
                         <div class="form-floating">
                             <InputSelect class="form-select" id="floatingSelect" aria-label="Floating label select example" @bind-Value="@valorEnFiltro">
                                 <option value="" selected disabled>--- Selecciona ---</option>
-                                <option value="idcliente">ID Cliente</option>
-                                <option value="idusuario">ID Usuario</option>
-                                <option value="nombres">Nombre</option>
-                                <option value="email">Email</option>
+                                <option value="idproducto">ID Producto</option>
+                                <option value="nombre">Nombre</option>
+                                <option value="tipoProducto">Tipo de Prodcuto</option>
                             </InputSelect>
                             <label for="floatingSelect"><strong>Filtrar en base a...</strong></label>
                         </div>
-						@*Restablecer*@
-                        <button type="button" class="btn btn-secondary bi bi-arrow-counterclockwise" @onclick="() => Restablecer()">Limpiar</button>
+						@*btn restablecer*@
+                        <button type="button" class="btn btn-secondary bi bi-arrow-counterclockwise" @onclick="() => Restablecer()"></button>
                     </div>
                 </div>
 
-				@*Buscar*@
+				@*Btn Buscar*@
                 <div class="col">
                     <div class="input-group" style="width: 500px">
-						@*Buscar*@
+						@*textbox buscar*@
                         <div class="form-floating d-flex align-items-center">
                             <InputText @bind-Value="@criterioBusqueda" class="form-control" placeholder="" id="floatingSearch" />
                             <label for="floatingSearch">Buscar</label>
                         </div>
-                        <button @onclick="Buscar" class="btn btn-secondary bi bi-search" type="button">Buscar</button>
+                        <button @onclick="Buscar" class="btn btn-secondary bi bi-search" type="button"></button>
                     </div>
                 </div>
             </div>
 
-            @if (ListaClientes == null)
+            @if (ListaProductos == null)
             {
                 <div class="d-flex align-items-center justify-content-center">
                     <em role="status" class="me-2">Cargando...</em>
@@ -77,39 +75,40 @@
                 <table class="table table-sm table-striped table-hover">
                     <thead>
                         <tr>
+                            <th>Imágen</th>
                             <th>ID</th>
-                            <th>ID Usuario</th>
                             <th>Nombre</th>
-                            <th>Email</th>
+                            <th>Tipo de productos</th>
+                            <th>Precio</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var cliente in ListaClientes)
+                        @foreach (var p in ListaProductos)
                         {
                             <tr>
-                                <td>@cliente.ClienteId</td>
-                                <td>@cliente.AplicationUserId</td>
-                                <td>@cliente.Nombre</td>
-                                <td>@cliente.Email</td>
+                                <td>@p.ImagenUrl</td>
+                                <td>@p.ProductoId</td>
+                                <td>@p.NombreProducto</td>
+                                <td>@p.TipoProducto</td>
+                                <td>@p.Precio.ToString("C")</td>
                                 <td>
-                                    <a href="/Clientes/View/@cliente.ClienteId/@cliente.AplicationUserId" class="btn btn-sm btn-dark bi-eye"></a>
-                                    <a href="/Clientes/Edit/@cliente.ClienteId/@cliente.AplicationUserId" class="btn btn-sm  btn-info bi bi-pencil-square"></a>
-                                    <a href="/Clientes/Delete/@cliente.ClienteId/@cliente.AplicationUserId" class="btn btn-sm btn-danger bi bi-trash3"></a>
+                                    <a href="/Productos/View/@p.ProductoId" class="btn btn-sm  btn-dark bi bi-eye"></a>
+                                    <a href="/Productos/Edit/@p.ProductoId" class="btn btn-sm  btn-info bi bi-pencil-square"></a>
+                                    <a href="/Productos/Delete/@p.ProductoId" class="btn btn-sm  btn-danger bi bi-trash"></a>
                                 </td>
+
                             </tr>
                         }
                     </tbody>
-                    <caption>Cant. de Clientes: @ListaClientes.Count</caption>
+                    <caption>Cant. de Productos: @ListaProductos.Count</caption>
                 </table>
             }
         </div>
     </div>
 </div>
-
 @code {
-    [Inject] ToastService ToastService { get; set; }
-    public List<Clientes>? ListaClientes { get; set; }
+    public List<Productos>? ListaProductos { get; set; }
     public string criterioBusqueda { get; set; } = string.Empty;
     public string valorEnFiltro { get; set; } = string.Empty;
     public DateTime? Desde { get; set; } = null;
@@ -117,14 +116,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ListaClientes = await clientesService.Listar(x => true);
+        ListaProductos = await productosService.Listar(x => true);
     }
 
     public async Task Buscar()
     {
         if (string.IsNullOrEmpty(valorEnFiltro))
         {
-            ListaClientes = await clientesService.Listar(x => true);
+            ListaProductos = await productosService.Listar(x => true);
             return;
         }
 
@@ -132,7 +131,7 @@
 
         switch (valorEnFiltro)
         {
-            case "idcliente":
+            case "idproducto":
                 if (string.IsNullOrEmpty(criterioBusqueda))
                 {
                     return;
@@ -141,24 +140,7 @@
                 {
                     return;
                 }
-                ListaClientes = await clientesService.Listar(lt => lt.ClienteId.ToString().Contains(criterioBusqueda));
-                break;
-
-            case "idusuario":
-                if (string.IsNullOrEmpty(criterioBusqueda))
-                {
-                    return;
-                }
-                ListaClientes = await clientesService.Listar(lt => lt.AplicationUserId.Contains(criterioBusqueda));
-                break;
-
-            case "email":
-                if (string.IsNullOrEmpty(criterioBusqueda))
-                {
-                    return;
-                }
-                ListaClientes = await clientesService.Listar(lt => lt.Usuario.Email.Trim().ToLower()
-                                                            .Contains(criterioBusqueda));
+                ListaProductos = await productosService.Listar(lt => lt.ProductoId.ToString().Contains(criterioBusqueda));
                 break;
 
             case "nombres":
@@ -166,12 +148,17 @@
                 {
                     return;
                 }
-                ListaClientes = await clientesService.Listar(lt => lt.Nombre.Trim().ToLower()
+                ListaProductos = await productosService.Listar(lt => lt.NombreProducto.Trim().ToLower()
                                                             .Contains(criterioBusqueda));
                 break;
 
-            default:
-                ListaClientes = await clientesService.Listar(x => true);
+            case "tipoProducto":
+                if (string.IsNullOrEmpty(criterioBusqueda))
+                {
+                    return;
+                }
+                ListaProductos = await productosService.Listar(lt => lt.TipoProducto.Trim().ToLower()
+                                                            .Contains(criterioBusqueda));
                 break;
         }
     }
@@ -182,7 +169,6 @@
         valorEnFiltro = string.Empty;
         Desde = null;
         Hasta = null;
-        ToastService.Notify(new(ToastType.Info, "Aviso", "Se han restablecido los criterios de búsqueda"));
-        ListaClientes = await clientesService.Listar(x => true);
+        ListaProductos = await productosService.Listar(x => true);
     }
 }

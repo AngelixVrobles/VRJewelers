@@ -1,0 +1,84 @@
+﻿@page "/Productos/Delete/{ProductoID:int}"
+
+@rendermode InteractiveServer
+@inject ProductosService productosService
+@inject NavigationManager navigation
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using VRJewelers.Components.Account
+@using VRJewelers.Components.Account.Pages
+@using VRJewelers.Data
+@using VRJewelers.Services
+@using VrJewelers.Models
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject ILogger<Register> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+@inject RoleManager<IdentityRole> RoleManager
+@inject AuthenticationStateProvider AuthStateProvider
+
+@attribute [Authorize(Roles = "admin")]
+
+<PageTitle>Eliminar Producto | @Producto.NombreProducto</PageTitle>
+<br />
+<br />
+<div class="container mb-4">
+    <div class="card">
+        <div class="text-left">
+            <h2 style="background-color:white; padding:5px;"><strong>Eliminando productos</strong></h2>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+
+            <span class="d-flex justify-content-center mb-3"><h3><strong>¿Esta seguro que desea eliminar este producto? </strong></h3></span>
+            <div class="d-flex justify-content-center mb-3">
+                <ul>
+                    <li>
+                        <div class="mt-3 text-center">
+                            <img src="@Producto.ImagenUrl" class="img-fluid rounded shadow-sm" style="max-height: 200px;" />
+                        </div>
+                    </li>
+                    <li><strong>ID:</strong> @ProductoID</li>
+                    <li><strong>Nombre del producto:</strong> @Producto.NombreProducto</li>
+                    <li><strong>Tipo del producto:</strong> @Producto.TipoProducto</li>
+                    <li><strong>Precio:</strong> @Producto.Precio.ToString("C")</li>
+                </ul>
+            </div>
+            <div class="text-center">
+                <button type="button" @onclick="Eliminar" class="btn btn-danger bi bi-trash">   Eliminar</button>
+                <a href="/Productos/Index" class="btn btn-secondary bi bi-arrow-left-circle">   Volver</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int ProductoID { get; set; }
+
+    public Productos Producto { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Producto = await productosService.BuscarPorId(ProductoID);
+    }
+
+    public async Task Eliminar()
+    {
+        await productosService.EliminarPorId(ProductoID);
+        NavigationManager.NavigateTo("/Productos/Index", forceLoad: true);
+    }
+}

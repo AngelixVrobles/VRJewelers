@@ -1,0 +1,167 @@
+﻿@page "/Productos/Create"
+
+@rendermode InteractiveServer
+@inject ProductosService productosService
+@inject NavigationManager navigation
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Authorization
+@using VRJewelers.Components.Account
+@using VRJewelers.Components.Account.Pages
+@using VRJewelers.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using VRJewelers.Services
+@using VrJewelers.Models
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject ILogger<Register> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+@inject RoleManager<IdentityRole> RoleManager
+
+@attribute [Authorize(Roles = "admin")]
+
+<PageTitle>Nuevo producto</PageTitle>
+<br />
+<br />
+<div class="container mb-4">
+    <div class="card">
+        <div class="text-left">
+            <h2 style="background-color:white; padding:5px;"><strong>Creando producto</strong></h2>
+        </div>
+    </div>
+</div>
+
+<EditForm Model="Producto" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+
+                <span class="d-flex justify-content-center mb-3"><h3><strong>Complete la información</strong></h3></span>
+                @if (!string.IsNullOrEmpty(MensajeError))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @MensajeError
+                    </div>
+                }
+                <div class="row mb-3">
+                    <div class="col">
+                        <label><strong>Nombre del producto *</strong></label>
+                        <InputText required class="form-control" @bind-Value="Producto.NombreProducto" placeholder="Nombre del producto" />
+                    </div>
+                    <div class="col">
+                        <label><strong>Tipo de producto *</strong></label>
+                        <InputSelect @bind-Value="Producto.TipoProducto" class="form-control" required>
+                            <option value="" selected disabled>-- Seleccione un tipo --</option>
+                            <option value="ANILLO">Anillo</option>
+                            <option value="COLLAR">Collar</option>
+                            <option value="PULSERA">Pulsera</option>
+                            <option value="ARETE">Arete</option>
+                            <option value="RELOJ">Reloj</option>
+                        </InputSelect>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label><strong>Precio *</strong></label>
+                        <InputNumber required class="form-control" @bind-Value="Producto.Precio" placeholder="RD$0.00" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label><strong>Descripción *</strong></label>
+                        <InputTextArea required
+                                       class="form-control"
+                                       @bind-Value="Producto.Descripcion"
+                                       placeholder="Descripción"
+                                       rows="3"
+                                       style="max-height:150px; overflow-y:auto;" />
+                    </div>
+                    <div class="col">
+                        @*Imagen*@
+                        <div class="mb-3">
+                            <label for="fileInput" class="form-label fw-bold">Imagen del producto</label>
+
+                            <label for="fileInput"
+                                   class="d-flex flex-column justify-content-center align-items-center p-4 border border-2 border-dashed rounded-3 text-muted"
+                                   style="cursor: pointer; min-height: 150px;">
+                                <i class="bi bi-cloud-arrow-up fs-1 mb-2"></i>
+                                <span>Arrastre su imagen aquí</span>
+                                <small class="text-secondary">o haga clic para seleccionar</small>
+                            </label>
+
+                            <InputFile id="fileInput"
+                                       OnChange="OnImageSelected"
+                                       accept="image/*"
+                                       multiple="false"
+                                       class="d-none" />
+                        </div>
+                        @if (!string.IsNullOrEmpty(Producto.ImagenUrl))
+                        {
+                            <div class="mt-3 text-center">
+                                <img src="@Producto.ImagenUrl" class="img-fluid rounded shadow-sm" style="max-height: 200px;" />
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success bi bi-floppy">   Guardar</button>
+                    <a href="/Productos/Index" class="btn btn-secondary bi bi-arrow-left-circle">   Volver</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</EditForm>
+
+@code {
+    public Productos Producto { get; set; } = new();
+
+    private IEnumerable<IdentityError>? identityErrors;
+
+    public string MensajeError { get; set; } = string.Empty;
+
+    public async Task Guardar(EditContext editContext)
+    {
+        if (string.IsNullOrEmpty(Producto.NombreProducto) ||
+        string.IsNullOrEmpty(Producto.TipoProducto) ||
+        Producto.Precio <= 0 ||
+        string.IsNullOrEmpty(Producto.Descripcion))
+        {
+            MensajeError = "Por favor complete todos los campos obligatorios.";
+            return;
+        }
+
+        if (await productosService.Validar(Producto))
+        {
+            MensajeError = "Ya existe un producto con ese nombre.";
+            return;
+        }
+
+        await productosService.Guardar(Producto);
+        NavigationManager.NavigateTo("/Productos/Index");
+    }
+
+    private async Task OnImageSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        if (file != null)
+        {
+            // Aquí puedes leerlo como stream, guardarlo en el servidor o en la BD
+            using var stream = file.OpenReadStream(maxAllowedSize: 10_000_000); // 10 MB máx
+                                                                                // Ejemplo: guardar el nombre en Producto.ImagenUrl (si lo manejas así)
+            Producto.ImagenUrl = file.Name;
+        }
+    }
+}
