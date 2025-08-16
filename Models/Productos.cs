@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VRJewelers.Models;
 
@@ -9,8 +10,8 @@ public class Productos
 
     public string TipoProducto { get; set; }
 
-    [Required(ErrorMessage = "Se Requiere un NombreProducto")]
-    [RegularExpression("^[a-zA-Z0-9 ]+$", ErrorMessage = "El NombreProducto debe Contener Solo Letras y Números.")]
+    [Required(ErrorMessage = "Se Requiere un nombre")]
+    [RegularExpression("^[a-zA-Z0-9 ]+$", ErrorMessage = "El nombre debe Contener Solo Letras y Números.")]
     public string? NombreProducto { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Se Requiere de una Descripción")]
