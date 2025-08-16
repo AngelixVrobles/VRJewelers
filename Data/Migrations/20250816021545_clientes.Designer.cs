@@ -12,8 +12,8 @@ using VRJewelers.Data;
 namespace VRJewelers.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250814224218_New")]
-    partial class New
+    [Migration("20250816021545_clientes")]
+    partial class clientes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,59 @@ namespace VRJewelers.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Carrito", b =>
+                {
+                    b.Property<int>("CarritoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CarritoId"));
+
+                    b.Property<int?>("ClienteId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SesionAnonimaId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CarritoId");
+
+                    b.HasIndex("ClienteId");
+
+                    b.ToTable("Carritos");
+                });
+
+            modelBuilder.Entity("CarritoDetalles", b =>
+                {
+                    b.Property<int>("CarritoDetalleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CarritoDetalleId"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CarritoId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("Precio")
+                        .HasColumnType("real");
+
+                    b.Property<int>("ProductoId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CarritoDetalleId");
+
+                    b.HasIndex("CarritoId");
+
+                    b.HasIndex("ProductoId");
+
+                    b.ToTable("CarritoDetalles");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -166,12 +219,6 @@ namespace VRJewelers.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("Apellido")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Cedula")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -188,12 +235,6 @@ namespace VRJewelers.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NickName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Descripcion")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -235,152 +276,6 @@ namespace VRJewelers.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("VRJewelers.Models.Estados", b =>
-                {
-                    b.Property<int>("EstadoId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EstadoId"));
-
-                    b.Property<string>("NombreEstado")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("EstadoId");
-
-                    b.ToTable("Estados");
-
-                    b.HasData(
-                        new
-                        {
-                            EstadoId = 1,
-                            NombreEstado = "Procesando"
-                        },
-                        new
-                        {
-                            EstadoId = 2,
-                            NombreEstado = "Empacado"
-                        },
-                        new
-                        {
-                            EstadoId = 3,
-                            NombreEstado = "Enviado"
-                        },
-                        new
-                        {
-                            EstadoId = 4,
-                            NombreEstado = "Entregado"
-                        },
-                        new
-                        {
-                            EstadoId = 5,
-                            NombreEstado = "Cancelado"
-                        });
-                });
-
-            modelBuilder.Entity("VRJewelers.Models.MetodoPagos", b =>
-                {
-                    b.Property<int>("MetodoPagoId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MetodoPagoId"));
-
-                    b.Property<string>("Descripcion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("MetodoPagoId");
-
-                    b.ToTable("MetodoPagos");
-
-                    b.HasData(
-                        new
-                        {
-                            MetodoPagoId = 1,
-                            Nombre = "Efectivo"
-                        },
-                        new
-                        {
-                            MetodoPagoId = 2,
-                            Nombre = "Tarjeta"
-                        });
-                });
-
-            modelBuilder.Entity("VRJewelers.Models.Ordenes", b =>
-                {
-                    b.Property<int>("OrdenId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrdenId"));
-
-                    b.Property<string>("ClienteId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("EstadoId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Fecha")
-                        .HasColumnType("datetime2");
-
-                    b.Property<float>("ITBIS")
-                        .HasColumnType("real");
-
-                    b.Property<int>("MetodoPagoId")
-                        .HasColumnType("int");
-
-                    b.Property<float>("Monto")
-                        .HasColumnType("real");
-
-                    b.Property<string>("NombreCliente")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Observacion")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Telefono")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("OrdenId");
-
-                    b.HasIndex("MetodoPagoId");
-
-                    b.ToTable("Ordenes");
-                });
-
-            modelBuilder.Entity("VRJewelers.Models.OrdenesDetalle", b =>
-                {
-                    b.Property<int>("DetalleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DetalleId"));
-
-                    b.Property<int>("Stock")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OrdenId")
-                        .HasColumnType("int");
-
-                    b.Property<float>("Precio")
-                        .HasColumnType("real");
-
-                    b.Property<int>("ProductoId")
-                        .HasColumnType("int");
-
-                    b.HasKey("DetalleId");
-
-                    b.HasIndex("OrdenId");
-
-                    b.HasIndex("ProductoId");
-
-                    b.ToTable("OrdenesDetalle");
-                });
-
             modelBuilder.Entity("VRJewelers.Models.Productos", b =>
                 {
                     b.Property<int>("ProductoId")
@@ -388,9 +283,6 @@ namespace VRJewelers.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductoId"));
-
-                    b.Property<int>("Stock")
-                        .HasColumnType("int");
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
@@ -405,19 +297,18 @@ namespace VRJewelers.Migrations
                     b.Property<string>("ImagenUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Descripcion")
+                    b.Property<string>("NombreProducto")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<float>("Precio")
                         .HasColumnType("real");
 
-                    b.Property<int>("TipoProducto")
-                        .HasColumnType("int");
+                    b.Property<string>("TipoProducto")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ProductoId");
-
-                    b.HasIndex("TipoProducto");
 
                     b.ToTable("Productos");
 
@@ -425,240 +316,208 @@ namespace VRJewelers.Migrations
                         new
                         {
                             ProductoId = 1,
-                            Cantidad = 50,
                             Descripcion = "Elegante anillo de oro 18 quilates con acabado pulido.",
                             Disponible = true,
                             ITBIS = 855f,
                             ImagenUrl = "/Imagen/Anillo18K.jpg",
-                            Nombre = "Anillo de Oro 18K",
+                            NombreProducto = "Anillo de Oro 18K",
                             Precio = 4750f,
-                            TipoId = 1
+                            TipoProducto = "ANILLO"
                         },
                         new
                         {
                             ProductoId = 2,
-                            Cantidad = 50,
                             Descripcion = "Collar de plata esterlina con diseño minimalista.",
                             Disponible = true,
                             ITBIS = 576f,
                             ImagenUrl = "/Imagen/Salvatoreplata.jpg",
-                            Nombre = "Collar de Plata",
+                            NombreProducto = "Collar de Plata",
                             Precio = 3200f,
-                            TipoId = 1
+                            TipoProducto = "COLLAR"
                         },
                         new
                         {
                             ProductoId = 3,
-                            Cantidad = 50,
                             Descripcion = "Pulsera de oro blanco con diamantes incrustados.",
                             Disponible = true,
                             ITBIS = 2160f,
                             ImagenUrl = "/imagen/PulseDiamantes.jpg",
-                            Nombre = "Pulsera de Diamantes",
+                            NombreProducto = "Pulsera de Diamantes",
                             Precio = 12000f,
-                            TipoId = 1
+                            TipoProducto = "PULSERA"
                         },
                         new
                         {
                             ProductoId = 4,
-                            Cantidad = 50,
                             Descripcion = "Aretes con perlas naturales y cierre de oro.",
                             Disponible = true,
                             ITBIS = 504f,
                             ImagenUrl = "/Imagen/Aretesperla.jpg",
-                            Nombre = "Aretes de Perla",
+                            NombreProducto = "Aretes de Perla",
                             Precio = 2800f,
-                            TipoId = 1
+                            TipoProducto = "ARETE"
                         },
                         new
                         {
                             ProductoId = 5,
-                            Cantidad = 50,
                             Descripcion = "Anillo de oro blanco con diamante central talla brillante.",
                             Disponible = true,
                             ITBIS = 1710f,
                             ImagenUrl = "/Imagen/anillocompromiso.jpg",
-                            Nombre = "Anillo de Compromiso",
+                            NombreProducto = "Anillo de Compromiso",
                             Precio = 9500f,
-                            TipoId = 1
+                            TipoProducto = "ANILLO"
                         },
                         new
                         {
                             ProductoId = 6,
-                            Cantidad = 50,
                             Descripcion = "Gargantilla de oro rosa con piedra de zafiro azul.",
                             Disponible = true,
                             ITBIS = 1566f,
                             ImagenUrl = "/Imagen/gargantilla_zafiro.jpg",
-                            Nombre = "Gargantilla de Zafiro",
+                            NombreProducto = "Gargantilla de Zafiro",
                             Precio = 8700f,
-                            TipoId = 1
+                            TipoProducto = "COLLAR"
                         },
                         new
                         {
                             ProductoId = 8,
-                            Cantidad = 50,
                             Descripcion = "Pendientes de oro amarillo con diseño clásico.",
                             Disponible = true,
                             ITBIS = 630f,
                             ImagenUrl = "/Imagen/pendientesdeoro.jpg",
-                            Nombre = "Pendientes de Oro",
+                            NombreProducto = "Pendientes de Oro",
                             Precio = 3500f,
-                            TipoId = 1
+                            TipoProducto = "ARETE"
                         },
                         new
                         {
                             ProductoId = 9,
-                            Cantidad = 50,
                             Descripcion = "Anillo de oro con rubí natural tallado.",
                             Disponible = true,
                             ITBIS = 1224f,
                             ImagenUrl = "/Imagen/anilloruby.jpg",
-                            Nombre = "Anillo con Rubí",
+                            NombreProducto = "Anillo con Rubí",
                             Precio = 6800f,
-                            TipoId = 1
+                            TipoProducto = "ANILLO"
                         },
                         new
                         {
                             ProductoId = 10,
-                            Cantidad = 50,
                             Descripcion = "Collar de oro blanco con diamantes de alta calidad.",
                             Disponible = true,
                             ITBIS = 2700f,
                             ImagenUrl = "/Imagen/collardiamantes.webp",
-                            Nombre = "Collar de Diamantes",
+                            NombreProducto = "Collar de Diamantes",
                             Precio = 15000f,
-                            TipoId = 1
+                            TipoProducto = "COLLAR"
                         },
                         new
                         {
-                            ProductoId = 14,
-                            Cantidad = 50,
+                            ProductoId = 11,
                             Descripcion = "Reloj de acero inoxidable con correa metálica y esfera minimalista.",
                             Disponible = true,
                             ITBIS = 936f,
                             ImagenUrl = "/Imagen/relojacero.jpg",
-                            Nombre = "Reloj Clásico de Acero",
+                            NombreProducto = "Reloj Clásico de Acero",
                             Precio = 5200f,
-                            TipoId = 2
+                            TipoProducto = "RELOJ"
                         },
                         new
                         {
-                            ProductoId = 15,
-                            Cantidad = 50,
+                            ProductoId = 12,
                             Descripcion = "Reloj automático con caja de oro y correa de cuero genuino.",
                             Disponible = true,
                             ITBIS = 2844f,
                             ImagenUrl = "/Imagen/RelojAutomaticodelujo.webp",
-                            Nombre = "Reloj Automático de Lujo",
+                            NombreProducto = "Reloj Automático de Lujo",
                             Precio = 15800f,
-                            TipoId = 2
+                            TipoProducto = "RELOJ"
                         });
                 });
 
-            modelBuilder.Entity("VRJewelers.Models.TipoProducto", b =>
+            modelBuilder.Entity("VrJewelers.Models.Admins", b =>
                 {
-                    b.Property<int>("TipoProducto")
+                    b.Property<int>("AdminId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TipoProducto"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AdminId"));
 
-                    b.Property<string>("Descripcion")
+                    b.Property<string>("ApplicationUserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("TipoProducto");
-
-                    b.ToTable("CategoriaProductos");
-
-                    b.HasData(
-                        new
-                        {
-                            TipoId = 1,
-                            Nombre = "Joyeria"
-                        },
-                        new
-                        {
-                            TipoId = 2,
-                            Nombre = "Reloj"
-                        });
-                });
-
-            modelBuilder.Entity("VRJewelers.Models.Ventas", b =>
-                {
-                    b.Property<int>("VentaId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VentaId"));
-
-                    b.Property<string>("ClienteId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<float>("Devuelta")
-                        .HasColumnType("real");
-
-                    b.Property<bool>("Eliminada")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("Fecha")
+                    b.Property<DateTime>("FechaIngreso")
                         .HasColumnType("datetime2");
 
-                    b.Property<float>("ITBS")
-                        .HasColumnType("real");
-
-                    b.Property<int>("MetodoPagoId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("NombreCliente")
+                    b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("OrdenId")
-                        .HasColumnType("int");
+                    b.HasKey("AdminId");
 
-                    b.Property<float>("Recibido")
-                        .HasColumnType("real");
+                    b.HasIndex("ApplicationUserId");
 
-                    b.Property<float>("SubTotal")
-                        .HasColumnType("real");
-
-                    b.Property<float>("Total")
-                        .HasColumnType("real");
-
-                    b.HasKey("VentaId");
-
-                    b.ToTable("Ventas");
+                    b.ToTable("Admins");
                 });
 
-            modelBuilder.Entity("VRJewelers.Models.VentasDetalle", b =>
+            modelBuilder.Entity("VrJewelers.Models.Clientes", b =>
                 {
-                    b.Property<int>("DetalleID")
+                    b.Property<int>("ClienteId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DetalleID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClienteId"));
 
-                    b.Property<int>("Stock")
-                        .HasColumnType("int");
+                    b.Property<string>("AplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("Precio")
-                        .HasColumnType("real");
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProductoId")
-                        .HasColumnType("int");
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("VentaId")
-                        .HasColumnType("int");
+                    b.Property<string>("UsuarioId")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("DetalleID");
+                    b.HasKey("ClienteId");
 
-                    b.HasIndex("ProductoId");
+                    b.HasIndex("UsuarioId");
 
-                    b.HasIndex("VentaId");
+                    b.ToTable("Clientes");
+                });
 
-                    b.ToTable("VentasDetalle");
+            modelBuilder.Entity("Carrito", b =>
+                {
+                    b.HasOne("VrJewelers.Models.Clientes", "Cliente")
+                        .WithMany()
+                        .HasForeignKey("ClienteId");
+
+                    b.Navigation("Cliente");
+                });
+
+            modelBuilder.Entity("CarritoDetalles", b =>
+                {
+                    b.HasOne("Carrito", "Carrito")
+                        .WithMany("Detalles")
+                        .HasForeignKey("CarritoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VRJewelers.Models.Productos", "Producto")
+                        .WithMany()
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Carrito");
+
+                    b.Navigation("Producto");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -712,72 +571,29 @@ namespace VRJewelers.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("VRJewelers.Models.Ordenes", b =>
+            modelBuilder.Entity("VrJewelers.Models.Admins", b =>
                 {
-                    b.HasOne("VRJewelers.Models.MetodoPagos", "MetodoPago")
+                    b.HasOne("VRJewelers.Data.ApplicationUser", "Usuario")
                         .WithMany()
-                        .HasForeignKey("MetodoPagoId")
+                        .HasForeignKey("ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("MetodoPago");
+                    b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("VRJewelers.Models.OrdenesDetalle", b =>
+            modelBuilder.Entity("VrJewelers.Models.Clientes", b =>
                 {
-                    b.HasOne("VRJewelers.Models.Ordenes", "Orden")
-                        .WithMany("OrdenesDetalle")
-                        .HasForeignKey("OrdenId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("VRJewelers.Models.Productos", "Producto")
+                    b.HasOne("VRJewelers.Data.ApplicationUser", "Usuario")
                         .WithMany()
-                        .HasForeignKey("ProductoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UsuarioId");
 
-                    b.Navigation("Orden");
-
-                    b.Navigation("Producto");
+                    b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("VRJewelers.Models.Productos", b =>
+            modelBuilder.Entity("Carrito", b =>
                 {
-                    b.HasOne("VRJewelers.Models.TipoProducto", "Tipo")
-                        .WithMany()
-                        .HasForeignKey("TipoProducto")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tipo");
-                });
-
-            modelBuilder.Entity("VRJewelers.Models.VentasDetalle", b =>
-                {
-                    b.HasOne("VRJewelers.Models.Productos", "Producto")
-                        .WithMany()
-                        .HasForeignKey("ProductoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("VRJewelers.Models.Ventas", null)
-                        .WithMany("VentasDetalle")
-                        .HasForeignKey("VentaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Producto");
-                });
-
-            modelBuilder.Entity("VRJewelers.Models.Ordenes", b =>
-                {
-                    b.Navigation("OrdenesDetalle");
-                });
-
-            modelBuilder.Entity("VRJewelers.Models.Ventas", b =>
-                {
-                    b.Navigation("VentasDetalle");
+                    b.Navigation("Detalles");
                 });
 #pragma warning restore 612, 618
         }
