@@ -1,0 +1,174 @@
+﻿@page "/Productos/Index"
+@using BlazorBootstrap
+@using Microsoft.AspNetCore.Authorization
+@using VRJewelers.Services
+@using VrJewelers.Models
+
+@rendermode InteractiveServer
+
+@inject ProductosService productosService
+@inject AuthenticationStateProvider AuthStateProvider
+
+@attribute [Authorize(Roles = "admin")]
+@attribute [StreamRendering]
+
+<PageTitle>Registro de Productos</PageTitle>
+<br />
+<br />
+<div class="container mb-4">
+    <div class="card">
+        <div class="row p-2 m-2">
+            <div class="col">
+                <div class="text-left">
+                    <h2 class="text-black">Productos</h2>
+                </div>
+            </div>
+            <div class="col text-end">
+                <a href="/Productos/Create" class="btn btn-secondary">Crear</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-4">
+                    <div class="input-group" style="width: 250px">
+                        <div class="form-floating">
+                            <InputSelect class="form-select" id="floatingSelect" aria-label="Floating label select example" @bind-Value="@valorEnFiltro">
+                                <option value="" selected disabled>--- Selecciona ---</option>
+                                <option value="idproducto">ID Producto</option>
+                                <option value="nombre">Nombre</option>
+                                <option value="tipoProducto">Tipo de Prodcuto</option>
+                            </InputSelect>
+                            <label for="floatingSelect"><strong>Filtrar en base a...</strong></label>
+                        </div>
+						@*btn restablecer*@
+                        <button type="button" class="btn btn-secondary bi bi-arrow-counterclockwise" @onclick="() => Restablecer()"></button>
+                    </div>
+                </div>
+
+				@*Btn Buscar*@
+                <div class="col">
+                    <div class="input-group" style="width: 500px">
+						@*textbox buscar*@
+                        <div class="form-floating d-flex align-items-center">
+                            <InputText @bind-Value="@criterioBusqueda" class="form-control" placeholder="" id="floatingSearch" />
+                            <label for="floatingSearch">Buscar</label>
+                        </div>
+                        <button @onclick="Buscar" class="btn btn-secondary bi bi-search" type="button"></button>
+                    </div>
+                </div>
+            </div>
+
+            @if (ListaProductos == null)
+            {
+                <div class="d-flex align-items-center justify-content-center">
+                    <em role="status" class="me-2">Cargando...</em>
+                    <div class="spinner-border" aria-hidden="true"></div>
+                </div>
+            }
+            else
+            {
+                <table class="table table-sm table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Imágen</th>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Tipo de productos</th>
+                            <th>Precio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in ListaProductos)
+                        {
+                            <tr>
+                                <td>@p.ImagenUrl</td>
+                                <td>@p.ProductoId</td>
+                                <td>@p.NombreProducto</td>
+                                <td>@p.TipoProducto</td>
+                                <td>@p.Precio.ToString("C")</td>
+                                <td>
+                                    <a href="/Productos/View/@p.ProductoId" class="btn btn-sm  btn-dark bi bi-eye"></a>
+                                    <a href="/Productos/Edit/@p.ProductoId" class="btn btn-sm  btn-info bi bi-pencil-square"></a>
+                                    <a href="/Productos/Delete/@p.ProductoId" class="btn btn-sm  btn-danger bi bi-trash"></a>
+                                </td>
+
+                            </tr>
+                        }
+                    </tbody>
+                    <caption>Cant. de Productos: @ListaProductos.Count</caption>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+@code {
+    public List<Productos>? ListaProductos { get; set; }
+    public string criterioBusqueda { get; set; } = string.Empty;
+    public string valorEnFiltro { get; set; } = string.Empty;
+    public DateTime? Desde { get; set; } = null;
+    public DateTime? Hasta { get; set; } = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaProductos = await productosService.Listar(x => true);
+    }
+
+    public async Task Buscar()
+    {
+        if (string.IsNullOrEmpty(valorEnFiltro))
+        {
+            ListaProductos = await productosService.Listar(x => true);
+            return;
+        }
+
+        criterioBusqueda.Trim().ToLower();
+
+        switch (valorEnFiltro)
+        {
+            case "idproducto":
+                if (string.IsNullOrEmpty(criterioBusqueda))
+                {
+                    return;
+                }
+                if (!criterioBusqueda.All(char.IsDigit))
+                {
+                    return;
+                }
+                ListaProductos = await productosService.Listar(lt => lt.ProductoId.ToString().Contains(criterioBusqueda));
+                break;
+
+            case "nombres":
+                if (string.IsNullOrEmpty(criterioBusqueda))
+                {
+                    return;
+                }
+                ListaProductos = await productosService.Listar(lt => lt.NombreProducto.Trim().ToLower()
+                                                            .Contains(criterioBusqueda));
+                break;
+
+            case "tipoProducto":
+                if (string.IsNullOrEmpty(criterioBusqueda))
+                {
+                    return;
+                }
+                ListaProductos = await productosService.Listar(lt => lt.TipoProducto.Trim().ToLower()
+                                                            .Contains(criterioBusqueda));
+                break;
+        }
+    }
+
+    public async Task Restablecer()
+    {
+        criterioBusqueda = string.Empty;
+        valorEnFiltro = string.Empty;
+        Desde = null;
+        Hasta = null;
+        ListaProductos = await productosService.Listar(x => true);
+    }
+}
