@@ -12,8 +12,8 @@ using VRJewelers.Data;
 namespace VRJewelers.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250815224846_newBackEnd")]
-    partial class newBackEnd
+    [Migration("20250815234904_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -1,0 +1,182 @@
+﻿@page "/Clientes/Create"
+
+@rendermode InteractiveServer
+@inject ClientesService clientesService
+@inject NavigationManager navigation
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using VRJewelers.Components.Account
+@using VRJewelers.Components.Account.Pages
+@using VRJewelers.Data
+@using VrJewelers.Models
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject ILogger<Register> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+@inject RoleManager<IdentityRole> RoleManager
+
+@attribute [Authorize(Roles = "admin")]
+
+<PageTitle>Nuevo Cliente</PageTitle>
+<div class="container mb-4">
+    <div class="card">
+        <div class="text-left">
+            <h2 style="background-color:white; padding:5px;"><i class="bi bi-cash-stack m-1"></i><strong>Creando Cliente</strong></h2>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+
+            <span class="d-flex justify-content-center mb-3"><h3><strong>Complete la información</strong></h3></span>
+            @if (!string.IsNullOrEmpty(MensajeError))
+            {
+                <div class="alert alert-danger" role="alert">
+                    @MensajeError
+                </div>
+            }
+            <EditForm Model="Input" OnValidSubmit=Guardar FormName="CrearCliente">
+                <DataAnnotationsValidator />
+                <div class="row mb-3">
+                    <div class="col">
+                        <label><strong>Nombres y Apellidos *</strong></label>
+                        <InputText required class="form-control" @bind-Value="Input.Nombre" placeholder="Nombres y Apellidos" />
+                    </div>
+                    <div class="col">
+                        <label><strong>Email *</strong></label>
+                        <InputText type="email" required class="form-control" @bind-Value="Input.Email" placeholder="Email" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label><strong>Contraseña *</strong></label>
+                        <InputText type="password" required class="form-control" @bind-Value="Input.Password" placeholder="Contraseña" />
+                    </div>
+                    <div class="col">
+                        <label><strong>Confirmar Contraseña  *</strong></label>
+                        <InputText type="password" required class="form-control" @bind-Value="Input.ConfirmPassword" placeholder="Confirmar Contraseña" />
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success bi bi-floppy">   Guardar</button>
+                    <a href="/Clientes/Index" class="btn btn-secondary bi bi-arrow-left-circle">   Volver</a>
+                </div>
+            </EditForm>
+
+        </div>
+    </div>
+</div>
+
+
+@code {
+    public Clientes Cliente { get; set; } = new();
+
+    private IEnumerable<IdentityError>? identityErrors;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+    public string MensajeError { get; set; } = string.Empty;
+
+    public async Task Guardar(EditContext editContext)
+    {
+        var user = CreateUser();
+
+        await UserStore.SetUserNameAsync(user, Input.Nombre, CancellationToken.None);
+        var emailStore = GetEmailStore();
+        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+        user.PasswordHash = Input.Password;
+        user.EmailConfirmed = true;
+        var result = await UserStore.CreateAsync(user, CancellationToken.None);
+
+        if (!result.Succeeded)
+        {
+            MensajeError = "El email no puede tener caracteres especiales, ni espacios o está ocupado";
+            identityErrors = result.Errors;
+            await UserManager.DeleteAsync(user);
+            return;
+        }
+
+        var rol = "cliente";
+        if (!await RoleManager.RoleExistsAsync(rol))
+            await RoleManager.CreateAsync(new IdentityRole(rol));
+
+        await UserManager.AddToRoleAsync(user, rol);
+
+        if (!result.Succeeded)
+        {
+            await UserManager.DeleteAsync(user);
+            return;
+        }
+
+        Logger.LogInformation("El usuario con rol de cliente se ha creado exitosamente.");
+        var userId = await UserManager.GetUserIdAsync(user);
+        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+        Cliente.AplicationUserId = user.Id;
+        Cliente.Nombre = Input.Nombre;
+        Cliente.Email = user.Email;
+        await clientesService.Guardar(Cliente);
+        NavigationManager.NavigateTo("/Clientes/Index");
+    }
+
+    private ApplicationUser CreateUser()
+    {
+        try
+        {
+            return Activator.CreateInstance<ApplicationUser>();
+        }
+        catch
+        {
+            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
+                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor.");
+        }
+    }
+
+    private IUserEmailStore<ApplicationUser> GetEmailStore()
+    {
+        if (!UserManager.SupportsUserEmail)
+        {
+            throw new NotSupportedException("The default UI requires a user store with email support.");
+        }
+        return (IUserEmailStore<ApplicationUser>)UserStore;
+    }
+
+    private sealed class InputModel
+    {
+        [Required(ErrorMessage = "El nombre es obligatorio")]
+        public string Nombre { get; set; } = "";
+
+        [Required]
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string Email { get; set; } = "";
+
+        [Required]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [DataType(DataType.Password)]
+        [Display(Name = "Password")]
+        public string Password { get; set; } = "";
+
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm password")]
+        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        public string ConfirmPassword { get; set; } = "";
+    }
+}

@@ -22,8 +22,15 @@ public class CarritoService(IDbContextFactory<ApplicationDbContext> dbFactory, I
 	// Obtener el carrito del cliente autenticado
 	private string ObtenerCarritoAnonimoId()
 	{
-		var session = _httpContextAccessor.HttpContext?.Session;
-		if (session == null) return string.Empty;
+		var session = null as ISession;
+        try
+		{
+            session = _httpContextAccessor.HttpContext?.Session;
+        }
+		catch(InvalidOperationException e)
+		{
+			if (session == null) return string.Empty;
+		}
 
 		const string key = "CarritoAnonimoId";
 
@@ -115,7 +122,7 @@ public class CarritoService(IDbContextFactory<ApplicationDbContext> dbFactory, I
 	}
 
 	// Agregar un producto al carrito
-	public async Task<bool> AgregarAlCarritoAsync(int productoId, int cantidad, float precio)
+	public async Task<bool> AgregarAlCarritoAsync(int productoId, float precio, int cantidad = 1)
 	{
 		await using var contexto = await _dbFactory.CreateDbContextAsync();
 

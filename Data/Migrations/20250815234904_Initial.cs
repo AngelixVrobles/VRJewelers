@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace VRJewelers.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateIdentitySchema : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,6 +53,25 @@ namespace VRJewelers.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Productos",
+                columns: table => new
+                {
+                    ProductoId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TipoProducto = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NombreProducto = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Precio = table.Column<float>(type: "real", nullable: false),
+                    ITBIS = table.Column<float>(type: "real", nullable: false),
+                    Disponible = table.Column<bool>(type: "bit", nullable: false),
+                    ImagenUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Productos", x => x.ProductoId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -67,6 +88,27 @@ namespace VRJewelers.Migrations
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Admins",
+                columns: table => new
+                {
+                    AdminId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FechaIngreso = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Admins", x => x.AdminId);
+                    table.ForeignKey(
+                        name: "FK_Admins_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -156,6 +198,97 @@ namespace VRJewelers.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Clientes",
+                columns: table => new
+                {
+                    ClienteId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AplicationUserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UsuarioId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Clientes", x => x.ClienteId);
+                    table.ForeignKey(
+                        name: "FK_Clientes_AspNetUsers_UsuarioId",
+                        column: x => x.UsuarioId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Carritos",
+                columns: table => new
+                {
+                    CarritoId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ClienteId = table.Column<int>(type: "int", nullable: true),
+                    FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SesionAnonimaId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Carritos", x => x.CarritoId);
+                    table.ForeignKey(
+                        name: "FK_Carritos_Clientes_ClienteId",
+                        column: x => x.ClienteId,
+                        principalTable: "Clientes",
+                        principalColumn: "ClienteId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CarritoDetalles",
+                columns: table => new
+                {
+                    CarritoDetalleId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CarritoId = table.Column<int>(type: "int", nullable: false),
+                    ProductoId = table.Column<int>(type: "int", nullable: false),
+                    Cantidad = table.Column<int>(type: "int", nullable: false),
+                    Precio = table.Column<float>(type: "real", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CarritoDetalles", x => x.CarritoDetalleId);
+                    table.ForeignKey(
+                        name: "FK_CarritoDetalles_Carritos_CarritoId",
+                        column: x => x.CarritoId,
+                        principalTable: "Carritos",
+                        principalColumn: "CarritoId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CarritoDetalles_Productos_ProductoId",
+                        column: x => x.ProductoId,
+                        principalTable: "Productos",
+                        principalColumn: "ProductoId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Productos",
+                columns: new[] { "ProductoId", "Descripcion", "Disponible", "ITBIS", "ImagenUrl", "NombreProducto", "Precio", "TipoProducto" },
+                values: new object[,]
+                {
+                    { 1, "Elegante anillo de oro 18 quilates con acabado pulido.", true, 855f, "/Imagen/Anillo18K.jpg", "Anillo de Oro 18K", 4750f, "ANILLO" },
+                    { 2, "Collar de plata esterlina con diseño minimalista.", true, 576f, "/Imagen/Salvatoreplata.jpg", "Collar de Plata", 3200f, "COLLAR" },
+                    { 3, "Pulsera de oro blanco con diamantes incrustados.", true, 2160f, "/imagen/PulseDiamantes.jpg", "Pulsera de Diamantes", 12000f, "PULSERA" },
+                    { 4, "Aretes con perlas naturales y cierre de oro.", true, 504f, "/Imagen/Aretesperla.jpg", "Aretes de Perla", 2800f, "ARETE" },
+                    { 5, "Anillo de oro blanco con diamante central talla brillante.", true, 1710f, "/Imagen/anillocompromiso.jpg", "Anillo de Compromiso", 9500f, "ANILLO" },
+                    { 6, "Gargantilla de oro rosa con piedra de zafiro azul.", true, 1566f, "/Imagen/gargantilla_zafiro.jpg", "Gargantilla de Zafiro", 8700f, "COLLAR" },
+                    { 8, "Pendientes de oro amarillo con diseño clásico.", true, 630f, "/Imagen/pendientesdeoro.jpg", "Pendientes de Oro", 3500f, "ARETE" },
+                    { 9, "Anillo de oro con rubí natural tallado.", true, 1224f, "/Imagen/anilloruby.jpg", "Anillo con Rubí", 6800f, "ANILLO" },
+                    { 10, "Collar de oro blanco con diamantes de alta calidad.", true, 2700f, "/Imagen/collardiamantes.webp", "Collar de Diamantes", 15000f, "COLLAR" },
+                    { 11, "Reloj de acero inoxidable con correa metálica y esfera minimalista.", true, 936f, "/Imagen/relojacero.jpg", "Reloj Clásico de Acero", 5200f, "RELOJ" },
+                    { 12, "Reloj automático con caja de oro y correa de cuero genuino.", true, 2844f, "/Imagen/RelojAutomaticodelujo.webp", "Reloj Automático de Lujo", 15800f, "RELOJ" }
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Admins_ApplicationUserId",
+                table: "Admins",
+                column: "ApplicationUserId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -194,11 +327,34 @@ namespace VRJewelers.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CarritoDetalles_CarritoId",
+                table: "CarritoDetalles",
+                column: "CarritoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CarritoDetalles_ProductoId",
+                table: "CarritoDetalles",
+                column: "ProductoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Carritos_ClienteId",
+                table: "Carritos",
+                column: "ClienteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Clientes_UsuarioId",
+                table: "Clientes",
+                column: "UsuarioId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Admins");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -215,7 +371,19 @@ namespace VRJewelers.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "CarritoDetalles");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Carritos");
+
+            migrationBuilder.DropTable(
+                name: "Productos");
+
+            migrationBuilder.DropTable(
+                name: "Clientes");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

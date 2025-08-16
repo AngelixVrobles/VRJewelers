@@ -6,14 +6,18 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using VRJewelers.Data
+@using VrJewelers.Models
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
 @inject SignInManager<ApplicationUser> SignInManager
+@inject RoleManager<IdentityRole> RoleManager
 @inject IEmailSender<ApplicationUser> EmailSender
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject ClientesService clientesService
+@inject CarritoService carritoService
 
 <PageTitle>Crear Cuenta</PageTitle>
 
@@ -53,35 +57,35 @@
 
 <style>
     .register-container {
-        min-height: 80vh;
-        max-width: 900px;
-        margin: 0 auto;
+    min-height: 80vh;
+    max-width: 900px;
+    margin: 0 auto;
     }
 
     .register-card {
-        width: 100%;
-        max-width: 400px;
-        border-radius: 1rem;
-        background: #ffffff;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 1rem;
+    background: #ffffff;
     }
 
     .external-login {
-        max-width: 300px;
+    max-width: 300px;
     }
 
     .btn-primary {
-        background: #5a2d82;
-        border-color: #5a2d82;
-        transition: background 0.3s ease;
+    background: #5a2d82;
+    border-color: #5a2d82;
+    transition: background 0.3s ease;
     }
 
-        .btn-primary:hover {
-            background: #431d5c;
-            border-color: #431d5c;
-        }
+    .btn-primary:hover {
+    background: #431d5c;
+    border-color: #431d5c;
+    }
 
     .form-floating > label {
-        color: #6c757d;
+    color: #6c757d;
     }
 </style>
 
@@ -96,6 +100,8 @@
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
+    public string MensajeError { get; set; } = "";
+
     public async Task RegisterUser(EditContext editContext)
     {
         var user = CreateUser();
@@ -103,33 +109,42 @@
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-        var result = await UserManager.CreateAsync(user, Input.Password);
+        user.PasswordHash = Input.Password;
+        user.NormalizedEmail = Input.Email.ToUpper();
+        user.NormalizedUserName = Input.Email.ToUpper();
+        user.EmailConfirmed = true;
+        var result = await UserStore.CreateAsync(user, CancellationToken.None);
 
         if (!result.Succeeded)
         {
+            await UserManager.DeleteAsync(user);
             identityErrors = result.Errors;
+            return;
+        }
+
+        var rol = "cliente";
+        if (!await RoleManager.RoleExistsAsync(rol))
+            await RoleManager.CreateAsync(new IdentityRole(rol));
+
+        var roleResult = await UserManager.AddToRoleAsync(user, rol);
+
+        if (!roleResult.Succeeded)
+        {
+            MensajeError = "Ni el username, ni el email pueden tener espacios o estar ocupados";
+            await UserManager.DeleteAsync(user);
             return;
         }
 
         Logger.LogInformation("User created a new account with password.");
 
-        var userId = await UserManager.GetUserIdAsync(user);
-        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-            new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-
-        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-
-        if (UserManager.Options.SignIn.RequireConfirmedAccount)
-        {
-            RedirectManager.RedirectTo(
-                "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
-        }
+        Clientes cliente = new();
+        cliente.AplicationUserId = user.Id;
+        cliente.Nombre = Input.Nombre;
+        cliente.Email = Input.Email;
+        await clientesService.Guardar(cliente);
 
         await SignInManager.SignInAsync(user, isPersistent: false);
+        await carritoService.MigrarCarritoAnonimoAlClienteAsync();
         RedirectManager.RedirectTo(ReturnUrl);
     }
 
@@ -157,6 +172,9 @@
 
     private sealed class InputModel
     {
+        [Required(ErrorMessage = "El nombre es obligatorio")]
+        public string Nombre { get; set; } = "";
+
         [Required(ErrorMessage = "El correo electrónico es obligatorio")]
         [EmailAddress(ErrorMessage = "Formato de correo inválido")]
         public string Email { get; set; } = "";
