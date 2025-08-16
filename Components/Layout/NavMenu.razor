@@ -33,11 +33,32 @@
                         @if (authContext.User.Identity.IsAuthenticated && authContext.User.IsInRole("cliente"))
                         {
                             <li class="nav-item">
-                                <NavLink class="nav-link text-dark">
+                                <NavLink class="nav-link text-dark" href="/Carrito/Checkout">
                                     <div class="row">
                                         <div class="col">Carrito</div>
                                         <div class="col"><span class="badge text-bg-dark">@(Carrito?.Detalles.Count)</span></div>
                                     </div>
+                                </NavLink>
+                            </li>
+                        }
+
+                        @if (authContext.User.Identity.IsAuthenticated && authContext.User.IsInRole("admin"))
+                        {
+                            <li class="nav-item">
+                                <NavLink class="nav-link text-dark" href="/Clientes/Index">
+                                    Clientes
+                                </NavLink>
+                            </li>
+
+                            <li class="nav-item">
+                                <NavLink class="nav-link text-dark" href="/Admins/Index">
+                                    Admins
+                                </NavLink>
+                            </li>
+
+                            <li class="nav-item">
+                                <NavLink class="nav-link text-dark" href="/Productos/Index">
+                                    Productos
                                 </NavLink>
                             </li>
                         }
@@ -98,7 +119,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <NavLink class="nav-link text-dark">
+                            <NavLink class="nav-link text-dark" href="/Carrito/Checkout">
                                 <div class="row">
                                     <div class="col">Carrito</div>
                                     <div class="col"><span class="badge text-bg-dark">@(Carrito?.Detalles.Count)</span></div>
