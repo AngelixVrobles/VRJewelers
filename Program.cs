@@ -22,6 +22,9 @@ builder.Services.AddScoped<ClientesService>();
 builder.Services.AddScoped<ProductosService>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
+builder.Services.AddSession();
+builder.Services.AddDistributedMemoryCache();
+
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = IdentityConstants.ApplicationScheme;
@@ -30,24 +33,28 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddDbContextFactory<ApplicationDbContext>(o =>
+    o.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+})
     .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddSignInManager()
+    .AddUserManager<UserManager<ApplicationUser>>()
+    .AddRoleManager<RoleManager<IdentityRole>>()
+    .AddDefaultTokenProviders();
+
+
+builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-builder.Services.AddScoped<ApplicationUser, UsersService>();
-builder.Services.AddScoped<IdentityRole, RolesService>();
-builder.Services.AddScoped<IdentityUserRole<string>, UserRolesService>();
-builder.Services.AddScoped<ProductosService>();
-builder.Services.AddScoped<ProductosService>();
-builder.Services.AddScoped<UsersService>();
-builder.Services.AddScoped<IdentityUserService>();
 
 builder.Services.AddBlazorBootstrap();
 
