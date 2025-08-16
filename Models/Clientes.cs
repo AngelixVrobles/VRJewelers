@@ -13,4 +13,5 @@ public class Clientes
 	public ApplicationUser? Usuario { get; set; } = null!;
 	[Required]
 	public string Nombre { get; set; } = null!;
+	public string Email { get; set; } = null!;
 }
