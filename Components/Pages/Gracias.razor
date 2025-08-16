@@ -1,0 +1,13 @@
+﻿@page "/Gracias"
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+
+<PageTitle>Gracias!!!</PageTitle>
+
+<div class="d-flex justify-content-center align-items-center flex-column text-center" style="min-height: 80vh;">
+    <img src="/Imagen/LOGO.png" alt="Gracias por tu compra" width="256" height="256" class="mb-4" />
+    <h1 class="text-success fw-bold">¡Gracias por su compra!</h1>
+    <p class="text-muted fs-5">Tu compra se hizo con éxito.</p>
+    <a href="/" class="btn btn-outline-success mt-3">Seguir comprando</a>
+</div>
