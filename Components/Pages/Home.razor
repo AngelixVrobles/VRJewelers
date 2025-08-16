@@ -115,9 +115,9 @@
 
             await UserStore.SetUserNameAsync(userAdmin, "Admin", CancellationToken.None);
             var emailStore = GetEmailStore();
-            await emailStore.SetEmailAsync(userAdmin, "Admin@gmail.com", CancellationToken.None);
+            await emailStore.SetEmailAsync(userAdmin, "Admin@admin.com", CancellationToken.None);
             await UserManager.SetPhoneNumberAsync(userAdmin, string.Empty);
-            userAdmin.PasswordHash = "Contraseña123@";
+            userAdmin.PasswordHash = "Admin123@";
             userAdmin.EmailConfirmed = true;
             var result = await UserStore.CreateAsync(userAdmin, CancellationToken.None);
 
