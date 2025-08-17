@@ -87,7 +87,16 @@
                         @foreach (var p in ListaProductos)
                         {
                             <tr>
-                                <td>@p.ImagenUrl</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(p.ImagenUrl))
+                                    {
+                                        <img src="@p.ImagenUrl" style="max-height: 75px;">
+                                    }
+                                    else
+                                    {
+                                        <span class="badge text-bg-dark">N/D</span>
+                                    }
+                                </td>
                                 <td>@p.ProductoId</td>
                                 <td>@p.NombreProducto</td>
                                 <td>@p.TipoProducto</td>
